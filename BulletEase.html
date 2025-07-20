@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <title>BulletEase</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Tailwind CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            accent: '#22d3ee',
+            soft: "#0891b2"
+          },
+          animation: {
+            'pulse-slow': 'pulse 2.3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+            'move-x': 'move-x 4.8s ease-in-out infinite',
+            'shimmer': 'shimmer 2s linear infinite',
+            'fade-in-up': 'fade-in-up .7s cubic-bezier(.17,.67,.4,1.05) both'
+          },
+          keyframes: {
+            'move-x': {
+              '0%,100%': { transform: 'translateX(0)' },
+              '50%': { transform: 'translateX(34px)' }
+            },
+            'shimmer': {
+              '0%': { backgroundPosition: '-400% 0' },
+              '100%': { backgroundPosition: '400% 0' }
+            },
+            'fade-in-up': {
+              '0%': { opacity: 0, transform: 'translateY(30px)' },
+              '100%': { opacity: 1, transform: 'translateY(0)' }
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    .glass {
+      background: rgba(24,32,56,0.73);
+      box-shadow: 0 8px 40px 0 rgba(0,0,0,.16);
+      border: 1.8px solid rgba(34,211,238,0.13);
+      backdrop-filter: blur(16px);
+    }
+    .scrollbar-thin { scrollbar-width: thin; scrollbar-color: #22d3ee #0f172a; }
+    .scrollbar-thin::-webkit-scrollbar { width: 8px; background: #23272b; }
+    .scrollbar-thin::-webkit-scrollbar-thumb { background: #22d3ee; border-radius: 12px; }
+  </style>
+</head>
+<body class="dark bg-gradient-to-br from-[#111928] via-[#164e63] to-[#1e293b] min-h-screen flex flex-col font-sans text-gray-100">
+
+  <!-- Header -->
+  <header class="w-full max-w-lg mx-auto flex flex-col items-center justify-between px-2 py-5 pb-3 space-y-1">
+    <div class="flex items-center gap-3 animate-fade-in-up">
+      <span class="bg-accent/30 p-2.5 rounded-xl shadow-inner">
+        <svg width="34" height="34" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="text-accent animate-spin-slow">
+          <circle cx="12" cy="12" r="10" stroke-width="1.5"/>
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 11l3 3 4-4"/>
+        </svg>
+      </span>
+      <span class="font-extrabold text-3xl tracking-tight text-accent drop-shadow-lg select-none" style="animation:fade-in-up .8s cubic-bezier(.18,.85,.41,1.07)">
+        BulletEase
+      </span>
+    </div>
+    <!-- Monicaa AI Toolkit tagline -->
+    <div class="animate-fade-in-up" style="animation-delay:.19s">
+      <span class="block text-[1.01rem] text-accent/80 font-medium tracking-wide">
+        Powered by <span class="font-bold text-soft">Monicaa AI Toolkit</span>
+      </span>
+    </div>
+  </header>
+
+  <!-- Main Card -->
+  <main class="flex-1 flex items-center justify-center">
+    <div id="mainCard" class="w-full glass shadow-2xl max-w-lg mx-auto px-4 py-8 rounded-3xl mt-0 mb-20 transition duration-200 animate-fade-in-up">
+      <label for="paragraphInput" class="block font-bold text-[1.1rem] text-accent mb-3 transition">Paste your paragraph:</label>
+      <textarea id="paragraphInput"
+        class="w-full p-5 rounded-2xl bg-accent/10 dark:bg-gray-800 shadow-sm border-0 outline-none focus:ring-2 focus:ring-accent/80 resize-none text-base h-28 transition placeholder:text-accent/60"
+        placeholder="Paste or type a long paragraph here..."
+      ></textarea>
+      <div class="my-5 flex flex-wrap items-center justify-center gap-3">
+        <button id="convertBtn" class="bg-accent hover:bg-accent/80 text-gray-900 font-bold py-2.5 px-7 rounded-2xl shadow-md transition-all duration-200 focus:ring-2 focus:ring-accent/40 active:scale-95 animate-fade-in-up">
+          Convert
+        </button>
+        <button id="saveBtn" class="bg-soft hover:bg-accent text-white font-semibold py-2.5 px-7 rounded-2xl shadow-md transition focus:ring-2 focus:ring-soft/40 active:scale-95 animate-fade-in-up">
+          Save
+        </button>
+        <button id="clearBtn" class="bg-rose-500 hover:bg-rose-400 text-white font-semibold py-2.5 px-7 rounded-2xl shadow-md transition focus:ring-2 focus:ring-rose-300 active:scale-95 animate-fade-in-up">
+          Clear
+        </button>
+        <button id="showHistoryBtn" class="bg-accent/30 hover:bg-accent/60 text-accent font-semibold py-2.5 px-7 rounded-2xl border border-accent/40 shadow-md transition focus:ring-2 focus:ring-accent/30 animate-fade-in-up">
+          History
+        </button>
+      </div>
+      <ul id="bulletList" class="mt-6 min-h-[56px] space-y-5 text-base">
+        <!-- Bullet points render here -->
+      </ul>
+    </div>
+  </main>
+
+  <!-- History Modal -->
+  <div id="historyModal" class="fixed inset-0 bg-black bg-opacity-40 z-50 flex items-center justify-center hidden transition duration-300 animate-fade-in-up">
+    <div class="max-w-md w-[95vw] glass rounded-3xl shadow-2xl p-5 relative animate-fade-in-up" style="animation-delay:.12s">
+      <h2 class="text-accent font-bold text-xl mb-2 px-1">History</h2>
+      <button id="closeHistory"
+        class="absolute top-4 right-5 text-accent hover:text-rose-400 text-2xl font-bold rounded-lg focus:outline-none transition duration-200">&times;</button>
+      <div class="max-h-64 overflow-y-auto scrollbar-thin px-1">
+        <ul id="historyList" class="space-y-4"></ul>
+      </div>
+      <button id="clearHistory"
+        class="mt-5 w-full bg-rose-500 hover:bg-rose-400 text-white py-2 px-4 rounded-xl transition shadow focus:ring-2 focus:ring-rose-200">Clear History</button>
+    </div>
+  </div>
+
+  <!-- Animated Watermark for BHV TECHNOLOGIES -->
+  <div class="fixed inset-x-0 bottom-3 flex justify-center pointer-events-none select-none z-50">
+    <span class="animate-pulse-slow animate-move-x relative text-accent text-xs sm:text-sm md:text-base font-bold tracking-wide opacity-80 drop-shadow bg-[#181e2e]/90 px-7 py-1 rounded-full ring-1 ring-accent/30 shadow backdrop-blur" style="background:linear-gradient(90deg,#22d3ee,#0ea5e9 30%,#38bdf8 60%,#22d3ee);background-size:300% 100%;animation:shimmer 2.2s linear infinite,move-x 6s ease-in-out infinite,pulse 2.8s cubic-bezier(0.4,0,0.6,1) infinite;">
+      <span class="inline-block animate-spin-slow mr-1">◆</span>
+      <span class="font-extrabold bg-gradient-to-r from-white via-accent to-soft bg-clip-text text-transparent"
+        style="animation: shimmer 2.5s linear infinite; background: linear-gradient(72deg,#ededed, #22d3ee 45%,#0ea5e9 60%, #ffffff 100%); background-clip: text; -webkit-background-clip: text; color: transparent;">
+        BHV TECHNOLOGIES
+      </span>
+    </span>
+  </div>
+
+  <script>
+    // Split text into bullet points at sentence boundaries
+    function splitParagraph(paragraph) {
+      return paragraph
+        .replace(/\s+([.?!])\s*/g, '$1 ')
+        .split(/([.?!])\s+/)
+        .reduce((acc, curr) => {
+          if (/[.?!]/.test(curr) && acc.length) acc[acc.length-1] += curr;
+          else if (curr.trim().length) acc.push(curr.trim());
+          return acc;
+        }, [])
+        .filter(s => s.length > 0);
+    }
+    // Animate-in bulletpoints
+    function displayBullets(sentences) {
+      const ul = document.getElementById('bulletList');
+      ul.innerHTML = '';
+      sentences.forEach((text, i) => {
+        const li = document.createElement('li');
+        li.className = "relative pl-8 before:content-['•'] before:absolute before:left-0 before:text-accent before:text-2xl opacity-0 translate-y-7";
+        li.textContent = text;
+        ul.appendChild(li);
+        setTimeout(() => {
+          li.style.transition = "all 0.54s cubic-bezier(.14,.91,.36,1)";
+          li.style.opacity = 1;
+          li.style.transform = "translateY(0)";
+        }, 130+48*i);
+      });
+    }
+    // Storage management
+    const HISTORY_KEY = 'bulletEaseHistory_BHV';
+    function getHistory() {
+      try { return JSON.parse(localStorage.getItem(HISTORY_KEY)) || []; }
+      catch { return []; }
+    }
+    function saveHistory(all) { localStorage.setItem(HISTORY_KEY, JSON.stringify(all)); }
+    function addHistory(bullets) {
+      const history = getHistory();
+      history.unshift({
+        date: new Date().toLocaleString(),
+        bullets: bullets
+      });
+      saveHistory(history.slice(0, 20));
+    }
+    function clearHistory() { localStorage.removeItem(HISTORY_KEY); }
+
+    // Main actions
+    document.getElementById('convertBtn').onclick = function() {
+      const val = document.getElementById('paragraphInput').value;
+      displayBullets(splitParagraph(val));
+    };
+    document.getElementById('saveBtn').onclick = function() {
+      const lis = document.querySelectorAll('#bulletList li');
+      if (!lis.length) { alert('Nothing to save!'); return; }
+      const bullets = Array.from(lis).map(li => li.textContent);
+      addHistory(bullets);
+      alert('Saved to history!');
+    };
+    document.getElementById('clearBtn').onclick = function() {
+      document.getElementById('paragraphInput').value = '';
+      document.getElementById('bulletList').innerHTML = '';
+    };
+    // History logic
+    const historyModal = document.getElementById('historyModal');
+    const showHistoryBtn = document.getElementById('showHistoryBtn');
+    const closeHistory = document.getElementById('closeHistory');
+    const historyList = document.getElementById('historyList');
+    const clearHistoryBtn = document.getElementById('clearHistory');
+    showHistoryBtn.onclick = function() {
+      renderHistoryList();
+      historyModal.classList.remove('hidden');
+      setTimeout(()=>historyModal.classList.add('animate-fade-in-up'),10);
+      document.body.style.overflow = "hidden";
+    };
+    closeHistory.onclick = function() {
+      historyModal.classList.remove('animate-fade-in-up');
+      setTimeout(()=>{historyModal.classList.add('hidden');},220);
+      document.body.style.overflow = "";
+    };
+    clearHistoryBtn.onclick = function() {
+      if (confirm("Clear all conversion history?")) {
+        clearHistory();
+        renderHistoryList();
+      }
+    };
+    function renderHistoryList() {
+      const all = getHistory();
+      historyList.innerHTML = '';
+      if (!all.length) {
+        const emptyLi = document.createElement('li');
+        emptyLi.className = "text-center text-gray-400 italic";
+        emptyLi.textContent = "No conversion history available.";
+        historyList.appendChild(emptyLi);
+        return;
+      }
+      all.forEach((entry, idx) => {
+        const li = document.createElement('li');
+        li.className = "rounded-2xl bg-accent/5 dark:bg-gray-900 p-3 shadow-md animate-fade-in-up";
+        li.style.animationDelay = (0.08 * idx)+"s";
+        // Date and bullets
+        const dateDiv = document.createElement('div');
+        dateDiv.className = "text-xs text-accent mb-1 font-mono";
+        dateDiv.textContent = entry.date;
+        li.appendChild(dateDiv);
+        const ulBullets = document.createElement('ul');
+        ulBullets.className = "pl-6 list-disc text-gray-200 text-[16px] mb-2";
+        entry.bullets.forEach(b => {
+          const liB = document.createElement('li');
+          liB.textContent = b;
+          ulBullets.appendChild(liB);
+        });
+        li.appendChild(ulBullets);
+        const restoreBtn = document.createElement('button');
+        restoreBtn.className = "mt-1 bg-accent/80 hover:bg-accent text-gray-900 font-bold py-1 px-2 rounded-lg transition w-full shadow-md";
+        restoreBtn.textContent = "Restore";
+        restoreBtn.onclick = () => {
+          displayBullets(entry.bullets);
+          historyModal.classList.remove('animate-fade-in-up');
+          setTimeout(()=>{historyModal.classList.add('hidden');},220);
+          document.body.style.overflow = "";
+        };
+        li.appendChild(restoreBtn);
+        historyList.appendChild(li);
+      });
+    }
+
+    // On load: animate-in and show last bullets
+    window.onload = function() {
+      const history = getHistory();
+      if (history.length) displayBullets(history[0].bullets);
+    };
+  </script>
+</body>
+</html>
