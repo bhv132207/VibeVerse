@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Monicaa – Modern AI Toolkit</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:400,500,600&display=swap">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg: #121212;
+      --surface: #1E1E1E;
+      --accent: #BB86FC;
+      --accent-teal: #03DAC6;
+      --accent-dark: #3700B3;
+      --text-primary: #E1E1E1;
+      --text-secondary: #A0A0A0;
+      --input-bg: #2D2D2D;
+      --input-border: #3A3A3A;
+      --input-border-focus: #BB86FC;
+      --shadow-glow: 0 4px 12px rgba(0,0,0,0.25);
+    }
+    html, body { background: var(--bg); color: var(--text-primary); font-family: 'Inter', 'SF Pro Display', system-ui, sans-serif; min-height: 100vh; margin: 0; }
+    header { text-align: center; margin-top: 2.5rem; margin-bottom: 2rem; }
+    h1 { font-weight: 600; font-size: 2.6rem; color: var(--accent); letter-spacing: -1px; background: linear-gradient(90deg, var(--accent), var(--accent-teal), var(--accent-dark)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    p { color: var(--text-secondary); font-size: 1.1rem; font-weight: 400; }
+    main { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 2.3rem; width: 100%; max-width: 440px; margin: 0 auto 30px auto; justify-items: center; }
+    .option-square { width: 160px; height: 160px; background: var(--surface); display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 27px; box-shadow: var(--shadow-glow); font-weight: 500; font-size: 1.13rem; line-height: 1.5; color: var(--text-primary); gap: 0.6rem; cursor: pointer; border: 2px solid transparent; outline: none; transition: background 0.2s, box-shadow 0.2s, border 0.2s, transform 0.2s; user-select: none; position: relative; }
+    .option-square:focus-visible, .option-square:hover { border: 2px solid var(--accent); box-shadow: 0 6px 18px rgba(187,134,252,0.16), var(--shadow-glow); background: #211933; transform: scale(1.045); }
+    .option-square .material-symbols-outlined { font-size: 2.7rem; color: var(--accent); margin-bottom: 0.3rem; transition: color 0.2s; }
+    .option-square:focus-visible .material-symbols-outlined, .option-square:hover .material-symbols-outlined { color: var(--accent-dark); }
+    .option-label { font-weight: 600; font-size: 1rem; color: var(--text-primary); margin-bottom: 0.11rem; }
+    .option-desc { color: var(--text-secondary); font-weight: 400; font-size: 0.91rem; text-align: center; line-height: 1.45; }
+    #modal { display: none; position: fixed; z-index: 50; inset: 0; background: rgba(0,0,0,0.72); align-items: center; justify-content: center; transition: background 0.2s; }
+    #modal.active { display: flex; }
+    #modal .modal-inner { background: var(--surface); border-radius: 20px; min-width: 360px; box-shadow: var(--shadow-glow); padding: 2.3rem 2rem 2rem 2rem; position: relative; color: var(--text-primary); font-size: 1.08rem; font-weight: 400; line-height: 1.5; animation: fadeIn 230ms; max-width: 92vw; }
+    @keyframes fadeIn { from { opacity: 0;} to{ opacity: 1;}}
+    .close-modal { position: absolute; top: 15px; right: 22px; border: none; background: none; font-size: 2.2rem; color: var(--text-secondary); cursor: pointer; transition: color 0.2s; }
+    .close-modal:hover { color: var(--accent); }
+    input[type=text], input[type=number] { width: 100%; background: var(--input-bg); color: var(--text-primary); border: 1px solid var(--input-border); border-radius: 9px; font-size: 1rem; padding: 10px 11px; font-weight: 400; margin-bottom: 18px; outline: none; box-sizing: border-box; transition: border 0.2s, background 0.2s; font-family: inherit; }
+    input[type=text]:focus, input[type=number]:focus { border: 1.4px solid var(--input-border-focus); background: #23233a; }
+    .app-btn-primary { background: linear-gradient(90deg, var(--accent), var(--accent-dark)); border-radius: 11px; padding: 9px 22px; color: #fff; font-weight: 600; font-size: 1rem; border: none; cursor: pointer; box-shadow: 0 3px 16px rgba(187,134,252,0.09); transition: background 0.2s, box-shadow 0.2s, transform 0.2s; outline: none; }
+    .app-btn-primary:active { transform: scale(0.975); opacity: 0.95; box-shadow: 0 2px 7px rgba(187,134,252,0.17); }
+    .app-btn-secondary { background: transparent; color: var(--accent); border: 2px solid var(--accent); border-radius: 11px; padding: 9px 22px; font-weight: 600; font-size: 1rem; cursor: pointer; transition: color 0.2s, border 0.2s, background 0.2s, transform 0.2s; outline: none; }
+    .app-btn-secondary:active { transform: scale(0.97); background: #19152c; }
+    :focus-visible { outline: 2.5px solid var(--accent-teal); outline-offset: 2px; }
+    .modal-inner::-webkit-scrollbar { width: 8px; }
+    .modal-inner::-webkit-scrollbar-thumb { background: #23233a; border-radius: 8px; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Monicaa</h1>
+    <p>Your Modern AI Toolkit</p>
+  </header>
+  <main>
+    <button class="option-square" onclick="openTool('summarizer')" aria-label="Summarizer">
+      <span class="material-symbols-outlined">summarize</span>
+      <span class="option-label">Summarizer</span>
+      <span class="option-desc">Summarize any topic with AI.</span>
+    </button>
+    <button class="option-square" onclick="openTool('translator')" aria-label="Text Translator">
+      <span class="material-symbols-outlined">translate</span>
+      <span class="option-label">Translator</span>
+      <span class="option-desc">Translate text instantly.</span>
+    </button>
+    <button class="option-square" onclick="openTool('mcq')" aria-label="MCQ Generator">
+      <span class="material-symbols-outlined">quiz</span>
+      <span class="option-label">MCQ Generator</span>
+      <span class="option-desc">Generate custom MCQs on any subject.</span>
+    </button>
+    <button class="option-square" onclick="openTool('news')" aria-label="News Generator">
+      <span class="material-symbols-outlined">feed</span>
+      <span class="option-label">News</span>
+      <span class="option-desc">Get the latest curated news.</span>
+    </button>
+  </main>
+  <div id="modal">
+    <div class="modal-inner">
+      <button class="close-modal" onclick="closeModal()" aria-label="Close">&times;</button>
+      <div id="modal-content"></div>
+    </div>
+  </div>
+  <script>
+    // Hugging Face API key (WARNING: Exposed in frontend)
+    const HF_API_KEY = "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";
+    // Model endpoints
+    const HF_ENDPOINTS = {
+      summarizer: "https://api-inference.huggingface.co/models/facebook/bart-large-cnn",
+      translator: "https://api-inference.huggingface.co/models/Helsinki-NLP/opus-mt-en-ROMANCE",
+      mcq: "https://api-inference.huggingface.co/models/mistralai/Mixtral-8x7B-Instruct-v0.1",
+      news: "https://api-inference.huggingface.co/models/mistralai/Mixtral-8x7B-Instruct-v0.1"
+    };
+
+    async function hfRequest(endpoint, input, extraParams = {}) {
+      const body = { inputs: input, ...extraParams };
+      const res = await fetch(endpoint, {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${HF_API_KEY}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(body)
+      });
+      if (!res.ok) throw new Error("API error: " + res.status);
+      return res.json();
+    }
+
+    function openTool(tool) {
+      let html = '';
+      if (tool === 'summarizer') {
+        html = `
+          <h2 style="color:var(--accent);font-weight:600;font-size:1.35rem;margin-bottom:18px;">Topic Summarizer</h2>
+          <input id="summary-input" type="text" placeholder="Enter topic or text..." autofocus>
+          <button class="app-btn-primary" onclick="summarize()">Summarize</button>
+          <div id="summary-result" style="margin-top:18px;"></div>
+        `;
+      }
+      if (tool === 'translator') {
+        html = `
+          <h2 style="color:var(--accent-teal);font-weight:600;font-size:1.35rem;margin-bottom:18px;">Text Translator</h2>
+          <input id="translate-input" type="text" placeholder="Enter text to translate...">
+          <input id="lang-input" type="text" placeholder="Target language (e.g., Hindi)">
+          <button class="app-btn-primary" onclick="translateText()">Translate</button>
+          <div id="translate-result" style="margin-top:18px;"></div>
+        `;
+      }
+      if (tool === 'mcq') {
+        html = `
+          <h2 style="color:var(--accent-dark);font-weight:600;font-size:1.35rem;margin-bottom:18px;">MCQ Generator</h2>
+          <input id="mcq-topic" type="text" placeholder="Topic (e.g., Photosynthesis)">
+          <input id="mcq-num" type="number" min="1" max="20" value="5">
+          <button class="app-btn-primary" onclick="generateMCQ()">Generate MCQs</button>
+          <div id="mcq-result" style="margin-top:18px;"></div>
+        `;
+      }
+      if (tool === 'news') {
+        html = `
+          <h2 style="color:var(--accent-dark);font-weight:600;font-size:1.35rem;margin-bottom:18px;">News Generator</h2>
+          <input id="news-topic" type="text" placeholder="Topic or Region">
+          <button class="app-btn-primary" onclick="getNews()">Get News</button>
+          <div id="news-result" style="margin-top:18px;"></div>
+        `;
+      }
+      document.getElementById("modal-content").innerHTML = html;
+      document.getElementById("modal").classList.add("active");
+    }
+    function closeModal() {
+      document.getElementById("modal").classList.remove("active");
+    }
+
+    async function summarize() {
+      const val = document.getElementById("summary-input").value.trim();
+      const out = document.getElementById("summary-result");
+      if (!val) return;
+      out.innerHTML = '<span style="color:var(--accent)">Summarizing...</span>';
+      try {
+        const data = await hfRequest(HF_ENDPOINTS.summarizer, val);
+        let summary = Array.isArray(data) && data[0]?.summary_text ? data[0].summary_text : (data?.summary_text || JSON.stringify(data));
+        out.innerHTML = "<b style='color:var(--accent)'>Summary:</b><br>" + summary;
+      } catch (e) {
+        out.innerHTML = "<span style='color:red'>Error: " + (e.message || e) + "</span>";
+      }
+    }
+    async function translateText() {
+      const text = document.getElementById("translate-input").value.trim();
+      const lang = document.getElementById("lang-input").value.trim();
+      const out = document.getElementById("translate-result");
+      if (!text || !lang) {
+        out.innerHTML = "<span style='color:#ffb399'>Enter text and language.</span>";
+        return;
+      }
+      out.innerHTML = '<span style="color:var(--accent-teal)">Translating...</span>';
+      try {
+        const input = `>>${lang}<< ${text}`;
+        const data = await hfRequest(HF_ENDPOINTS.translator, input);
+        let translated = Array.isArray(data) && data[0]?.translation_text ? data[0].translation_text : (data?.translation_text || JSON.stringify(data));
+        out.innerHTML = "<b style='color:var(--accent-teal)'>Translated text:</b><br>" + translated;
+      } catch (e) {
+        out.innerHTML = "<span style='color:red'>Error: " + (e.message || e) + "</span>";
+      }
+    }
+    async function generateMCQ() {
+      const topic = document.getElementById("mcq-topic").value.trim();
+      const num = document.getElementById("mcq-num").value;
+      const out = document.getElementById("mcq-result");
+      if (!topic || !num) {
+        out.innerHTML = "<span style='color:#ffb399'>Enter topic and count.</span>";
+        return;
+      }
+      out.innerHTML = '<span style="color:var(--accent-dark)">Generating...</span>';
+      try {
+        const prompt = `Generate ${num} multiple choice questions with 4 options and answers on the topic: ${topic}. Format: Q: ...\nA) ...\nB) ...\nC) ...\nD) ...\nAnswer: ...`;
+        const data = await hfRequest(HF_ENDPOINTS.mcq, prompt, { parameters: { max_new_tokens: 512, temperature: 0.7 } });
+        let mcqs = Array.isArray(data) && data[0]?.generated_text ? data[0].generated_text : (data?.generated_text || JSON.stringify(data));
+        out.innerHTML = "<b style='color:var(--accent-dark)'>MCQs:</b><br><pre style='white-space:pre-wrap;'>" + mcqs + "</pre>";
+      } catch (e) {
+        out.innerHTML = "<span style='color:red'>Error: " + (e.message || e) + "</span>";
+      }
+    }
+    async function getNews() {
+      const q = document.getElementById("news-topic").value.trim();
+      const out = document.getElementById("news-result");
+      if (!q) {
+        out.innerHTML = "<span style='color:#ffb399'>Enter topic or region.</span>";
+        return;
+      }
+      out.innerHTML = '<span style="color:var(--accent-dark)">Fetching news...</span>';
+      try {
+        const prompt = `Write a short news article about: ${q}`;
+        const data = await hfRequest(HF_ENDPOINTS.news, prompt, { parameters: { max_new_tokens: 256, temperature: 0.7 } });
+        let news = Array.isArray(data) && data[0]?.generated_text ? data[0].generated_text : (data?.generated_text || JSON.stringify(data));
+        out.innerHTML = "<b style='color:var(--accent-dark)'>Top news:</b><br><pre style='white-space:pre-wrap;'>" + news + "</pre>";
+      } catch (e) {
+        out.innerHTML = "<span style='color:red'>Error: " + (e.message || e) + "</span>";
+      }
+    }
+    window.openTool = openTool;
+    window.closeModal = closeModal;
+    window.summarize = summarize;
+    window.translateText = translateText;
+    window.generateMCQ = generateMCQ;
+    window.getNews = getNews;
+    window.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+  </script>
+</body>
+<div style="position:fixed;bottom:18px;right:22px;opacity:0.18;font-size:1.25rem;font-weight:700;pointer-events:none;z-index:1000;letter-spacing:2px;user-select:none;">BHV TECHNOLOGIES</div>
+</html> 
